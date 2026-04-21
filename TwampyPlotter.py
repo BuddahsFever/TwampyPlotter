@@ -2,6 +2,22 @@ import re
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerBase
+from matplotlib.patches import Rectangle
+import numpy as np
+
+class BarcodeHandler(HandlerBase):
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        rng = np.random.default_rng(42)
+        stripes = sorted(rng.uniform(0, width, 14))
+        artists = []
+        for x in stripes:
+            lw = rng.uniform(0.8, 2.5)
+            rect = Rectangle((x - lw / 2 + xdescent, ydescent), lw, height,
+                              transform=trans, facecolor='gray', edgecolor='none',
+                              alpha=rng.uniform(0.3, 0.85))
+            artists.append(rect)
+        return artists
 
 logfile = 'twampy-2026-04-20_09-08-39.log'
 
@@ -51,8 +67,7 @@ fig, ax1 = plt.subplots(figsize=(16, 8))
 
 # 1. Packet Loss (Achtergrond)
 if missing_seqs:
-    ymax = max(df['inbound'].max(), df['outbound'].max()) + 50
-    ax1.vlines(missing_seqs, ymin=0, ymax=ymax,
+    ax1.vlines(missing_seqs, ymin=0, ymax=max(df['inbound'].max(), df['outbound'].max()) + 50,
                colors='gray', alpha=0.08, linewidth=0.5, zorder=1)
 
 # 2. Latency Lijnen
@@ -64,7 +79,8 @@ ax1.set_xlabel('Packet Sequence (Chronologisch)', fontsize=11)
 ax1.set_ylabel('Latency (ms)', fontsize=11)
 ax1.set_title('ISP Netwerk Analyse: Latency & Loss vs Tijdlijn', fontsize=14, pad=20)
 ax1.grid(True, alpha=0.15)
-ax1.legend(loc='upper right')
+loss_handle = ax1.vlines([], [], [], colors='gray', alpha=0.5, linewidth=1, label='Packet Loss')
+ax1.legend(loc='upper right', handler_map={loss_handle: BarcodeHandler()})
 
 # 3. De Secundaire X-as (Tijdlijn)
 ax2 = ax1.twiny()
