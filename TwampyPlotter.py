@@ -20,8 +20,9 @@ class BarcodeHandler(HandlerBase):
             artists.append(rect)
         return artists
 
+# CONFIGURATIE: pas hier de naam van het logbestand aan
 
-logfile = 'twampy-2026-04-30_08-30-01.log'
+logfile = 'twampy-2026-05-04_08-30-01.log'
 
 # DOEL: Packet loss meten is de kern van dit script.
 #
